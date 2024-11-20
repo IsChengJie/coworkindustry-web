@@ -34,6 +34,7 @@ export default defineConfig(({ command, mode }) => {
       alias: {
         '@': path.resolve(__dirname, 'src'),
       },
+      mainFields: ['module', 'jsnext:main', 'jsnext'],
     },
     build: {
       // 启用 CSS 代码分割
@@ -70,6 +71,10 @@ export default defineConfig(({ command, mode }) => {
           drop_console: mode === 'production',
           drop_debugger: mode === 'production'
         }
+      },
+      commonjsOptions: {
+        include: [/node_modules/],
+        transformMixedEsModules: true
       }
     },
     // 开发服务器配置
@@ -107,9 +112,17 @@ export default defineConfig(({ command, mode }) => {
         'vue-router',
         'pinia',
         'element-plus',
-        '@element-plus/icons-vue'
+        '@element-plus/icons-vue',
+        '@supabase/supabase-js',
+        '@supabase/postgrest-js'
       ],
-      exclude: ['@supabase/supabase-js']
+      exclude: ['@supabase/supabase-js'],
+      esbuildOptions: {
+        target: 'es2020',
+        supported: { 
+          bigint: true 
+        },
+      }
     }
   } as UserConfig
 }) 
