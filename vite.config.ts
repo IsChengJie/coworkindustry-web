@@ -17,15 +17,19 @@ export default defineConfig(({ command, mode }) => {
       // 自动导入 API
       AutoImport({
         imports: ['vue', 'vue-router', 'pinia'],
-        dts: 'src/auto-imports.d.ts',
         resolvers: [ElementPlusResolver()],
+        dts: 'src/auto-imports.d.ts',
+        eslintrc: {
+          enabled: true
+        }
       }),
       // 自动导入组件
       Components({
         resolvers: [ElementPlusResolver()],
-      }),
+        dts: 'src/components.d.ts'
+      })
     ],
-    base: './',
+    base: '/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),
@@ -39,25 +43,34 @@ export default defineConfig(({ command, mode }) => {
       // 构建配置
       rollupOptions: {
         output: {
-          manualChunks: (id: string) => {
+          manualChunks: (id) => {
             if (id.includes('node_modules')) {
+              if (id.includes('element-plus')) {
+                return 'element-plus-vendor'
+              }
               if (id.includes('vue') || id.includes('vue-router') || id.includes('pinia')) {
                 return 'vue-vendor'
               }
-              if (id.includes('element-plus')) {
-                return 'element-plus'
+              if (id.includes('@supabase')) {
+                return 'supabase-vendor'
               }
               return 'vendors'
             }
           },
-          // 自定义 chunk 文件名格式
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',
           assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
-        },
+        }
       },
       // 设置块大小警告的限制
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 2000,
+      // 生产环境移除 console
+      terserOptions: {
+        compress: {
+          drop_console: mode === 'production',
+          drop_debugger: mode === 'production'
+        }
+      }
     },
     // 开发服务器配置
     server: {
@@ -89,7 +102,14 @@ export default defineConfig(({ command, mode }) => {
     },
     // 优化依赖预构建
     optimizeDeps: {
-      include: ['vue', 'vue-router', 'pinia', 'element-plus'],
+      include: [
+        'vue',
+        'vue-router',
+        'pinia',
+        'element-plus',
+        '@element-plus/icons-vue'
+      ],
+      exclude: ['@supabase/supabase-js']
     }
   } as UserConfig
 }) 
