@@ -51,31 +51,114 @@ export const useAuthStore = defineStore('auth', {
       company: string;
       address: string;
     }) {
-      const { data, error } = await supabase.auth.signUp({
-        email: credentials.email,
-        password: credentials.password || '123456',
-        options: {
-          data: {
-            first_name: credentials.firstName,
-            last_name: credentials.lastName,
-            phone: credentials.phone,
-            company: credentials.company,
-            address: credentials.address,
-          }
+      try {
+        // 首先检查用户是否已存在
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', credentials.email)
+          .maybeSingle()
+
+        if (existingUser) {
+          ElMessage({
+            message: '该邮箱已被注册',
+            type: 'error',
+            duration: 3000,
+            showClose: true,
+            position: 'top',
+          })
+          throw new Error('该邮箱已被注册')
         }
-      })
 
-      if (error) {
-        throw error
-      }
+        // 注册新用户
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: credentials.email,
+          password: credentials.password || '123456',
+          options: {
+            data: {
+              first_name: credentials.firstName,
+              last_name: credentials.lastName,
+              phone: credentials.phone,
+              company: credentials.company,
+              address: credentials.address,
+            }
+          }
+        })
 
-      return data
-    },
+        if (signUpError) throw signUpError
 
-    async logout() {
-      const { error } = await supabase.auth.signOut()
-      
-      if (error) {
+        // 插入新用户数据
+        const { data: newUser, error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              email: credentials.email,
+              password: credentials.password,
+              first_name: credentials.firstName,
+              last_name: credentials.lastName,
+              phone: credentials.phone,
+              company: credentials.company,
+              address: credentials.address
+            }
+          ])
+          .select()
+          .maybeSingle()
+
+        if (insertError) {
+          console.error('Insert user error:', insertError)
+          ElMessage({
+            message: '注册失败，请重试',
+            type: 'error',
+            duration: 3000,
+            showClose: true,
+            position: 'top',
+          })
+          throw insertError
+        }
+
+        if (!newUser) {
+          ElMessage({
+            message: '注册失败，请重试',
+            type: 'error',
+            duration: 3000,
+            showClose: true,
+            position: 'top',
+          })
+          throw new Error('注册失败，请重试')
+        }
+        }
+        console.log('Registration successful:', newUser)
+        ElMessage({
+          message: '注册成功！',
+          type: 'success',
+          duration: 3000,
+          showClose: true,
+          position: 'top',
+        })
+        return newUser
+
+      } catch (error: any) {
+        console.error('Registration error:', error)
+        console.log('Registration successful:', data)
+        ElMessage({
+          message: '注册成功！',
+          type: 'success',
+          duration: 3000,
+          showClose: true,
+          position: 'top',
+        })
+        return data
+
+      } catch (error: any) {
+        console.error('Registration error:', error)
+        this.error = error.message
+        ElMessage({
+          message: this.error || '注册失败',
+          type: 'error',
+          duration: 3000,
+          showClose: true,
+          position: 'top',
+        })
         throw error
       }
 
