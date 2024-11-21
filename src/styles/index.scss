@@ -1,0 +1,108 @@
+// 导入变量和基础样式
+@use "variables" as *;
+@use "main" as *;
+
+// 全局基础样式
+:root {
+  --header-height: #{$header-height};
+  --primary-color: #{$primary-color};
+  --success-color: #{$success-color};
+  --warning-color: #{$warning-color};
+  --danger-color: #{$danger-color};
+  --info-color: #{$info-color};
+}
+
+// 重置基础样式
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-size: $font-size-base;
+  line-height: 1.5;
+  color: $text-primary;
+  background-color: $background-base;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Element Plus 全局样式覆盖
+.el-button {
+  font-weight: 500;
+}
+
+.el-table {
+  --el-table-border-color: #{$border-light};
+  --el-table-header-bg-color: #{$background-base};
+  
+  th {
+    font-weight: 600;
+    color: $text-primary;
+  }
+}
+
+.el-card {
+  border-color: $border-light;
+  box-shadow: $box-shadow-light;
+}
+
+.el-tag {
+  &.el-tag--success {
+    background-color: #ecfdf5;
+    border-color: transparent;
+    color: #059669;
+  }
+  
+  &.el-tag--warning {
+    background-color: #fffbeb;
+    border-color: transparent;
+    color: #d97706;
+  }
+  
+  &.el-tag--info {
+    background-color: #f3f4f6;
+    border-color: transparent;
+    color: #6b7280;
+  }
+}
+
+// 通用工具类
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: $spacing-base;
+}
+
+.gap-4 {
+  gap: $spacing-large;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+} 

@@ -6,6 +6,9 @@ import App from './App.vue'
 import router from './router'
 import { useAuthStore } from './store/auth'
 
+// 导入全局样式
+import '@/styles/index.scss'
+
 const app = createApp(App)
 const pinia = createPinia()
 

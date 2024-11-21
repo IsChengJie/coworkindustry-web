@@ -28,7 +28,11 @@
         <el-button type="primary" class="export-btn">
           Export <span class="count">0</span>
         </el-button>
-        <el-button type="primary" class="new-booking-btn">
+        <el-button 
+          type="primary" 
+          class="new-booking-btn"
+          @click="showNewBookingDrawer"
+        >
           New Booking
         </el-button>
       </div>
@@ -67,12 +71,20 @@
         />
       </div>
     </el-card>
+
+    <!-- 新增预订抽屉 -->
+    <NewBookingDrawer
+      :visible="drawerVisible"
+      @update:visible="drawerVisible = $event"
+      @submit="handleNewBooking"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Search, Filter } from '@element-plus/icons-vue'
+import NewBookingDrawer from './components/NewBookingDrawer.vue'
 
 // 搜索和筛选
 const searchQuery = ref('')
@@ -112,6 +124,18 @@ const bookings = ref<Booking[]>([
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(100)
+
+// 初始化为 false
+const drawerVisible = ref(false)
+
+const showNewBookingDrawer = () => {
+  drawerVisible.value = true
+}
+
+const handleNewBooking = (formData: any) => {
+  console.log('New booking:', formData)
+  // 处理新预订的逻辑
+}
 </script>
 
 <style scoped lang="scss">
