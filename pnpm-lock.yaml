@@ -70,7 +70,7 @@ importers:
         specifier: ^0.25.1
         version: 0.25.2(@babel/parser@7.26.2)(rollup@3.29.5)(vue@3.5.13(typescript@5.1.6))
       vite:
-        specifier: ^4.4.9
+        specifier: ^4.5.5
         version: 4.5.5(@types/node@18.19.64)(sass@1.81.0)(terser@5.36.0)
       vue-tsc:
         specifier: ^1.8.8

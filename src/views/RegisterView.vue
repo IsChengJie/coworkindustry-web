@@ -38,14 +38,6 @@
             <el-input v-model="registerForm.email" type="email" />
           </el-form-item>
 
-          <el-form-item label="Password" prop="password" required>
-            <el-input v-model="registerForm.password" type="password" show-password />
-          </el-form-item>
-
-          <el-form-item label="Confirm Password" prop="confirmPassword" required>
-            <el-input v-model="registerForm.confirmPassword" type="password" show-password />
-          </el-form-item>
-
           <el-form-item label="Phone number" prop="phone" required>
             <el-input v-model="registerForm.phone">
               <template #prepend>+1</template>
@@ -109,36 +101,11 @@ const registerForm = reactive({
   firstName: '',
   lastName: '',
   email: '',
-  password: '',
-  confirmPassword: '',
   phone: '',
   company: '',
   address: '',
   agreement: false
 })
-
-const validatePass = (rule: any, value: string, callback: any) => {
-  if (value === '') {
-    callback(new Error('Please enter your password'))
-  } else {
-    if (registerForm.confirmPassword !== '') {
-      if (formRef.value) {
-        formRef.value.validateField('confirmPassword')
-      }
-    }
-    callback()
-  }
-}
-
-const validatePass2 = (rule: any, value: string, callback: any) => {
-  if (value === '') {
-    callback(new Error('Please confirm your password'))
-  } else if (value !== registerForm.password) {
-    callback(new Error('Passwords do not match!'))
-  } else {
-    callback()
-  }
-}
 
 const rules = reactive<FormRules>({
   firstName: [
@@ -162,13 +129,6 @@ const rules = reactive<FormRules>({
   ],
   address: [
     { required: true, message: 'Please enter your street address', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, validator: validatePass, trigger: 'blur' },
-    { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
-  ],
-  confirmPassword: [
-    { required: true, validator: validatePass2, trigger: 'blur' }
   ]
 })
 
