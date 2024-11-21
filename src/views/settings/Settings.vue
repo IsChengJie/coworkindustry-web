@@ -26,6 +26,10 @@
           <el-icon><Monitor /></el-icon>
           <span>设备管理</span>
         </el-menu-item>
+        <el-menu-item index="locations">
+          <el-icon><Location /></el-icon>
+          <span>位置管理</span>
+        </el-menu-item>
       </el-menu>
     </div>
 
@@ -107,6 +111,9 @@
 
       <!-- 设备管理 -->
       <device-management v-show="activeMenu === 'devices'" />
+
+      <!-- 位置管理 -->
+      <location-management v-show="activeMenu === 'locations'" />
     </div>
   </div>
 </template>
@@ -114,9 +121,10 @@
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
-import { User, Lock, Bell, Brush, Monitor, Plus } from '@element-plus/icons-vue'
-import DeviceManagement from './DeviceManagement.vue'
+import type { FormInstance, FormRules } from 'element-plus/es/components/form'
+import { User, Lock, Bell, Brush, Monitor, Plus, Location } from '@element-plus/icons-vue'
+import DeviceManagement from './devices/DeviceManagement.vue'
+import LocationManagement from './locations/LocationManagement.vue'
 
 const activeMenu = ref('profile')
 
@@ -172,13 +180,16 @@ const passwordRules = reactive<FormRules>({
   ],
   confirmPassword: [
     { required: true, message: 'Please confirm your new password', trigger: 'blur' },
-    { validator: (rule, value, callback) => {
-      if (value !== passwordForm.newPassword) {
-        callback(new Error('Passwords do not match'))
-      } else {
-        callback()
-      }
-    }, trigger: 'blur' }
+    { 
+      validator: (_rule: any, value: string, callback: any) => {
+        if (value !== passwordForm.newPassword) {
+          callback(new Error('Passwords do not match'))
+        } else {
+          callback()
+        }
+      }, 
+      trigger: 'blur' 
+    }
   ]
 })
 
