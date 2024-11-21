@@ -3,12 +3,12 @@
     <div class="settings-section">
       <div class="locations-header">
         <div class="header-title">
-          <h2>位置管理</h2>
-          <p class="locations-description">管理公司下位置及营业时间</p>
+          <h2>Location Management</h2>
+          <p class="locations-description">Manage company locations and their business hours</p>
         </div>
         <div class="header-actions">
           <el-button type="primary" @click="showAddLocationDialog">
-            <el-icon><Plus /></el-icon>添加位置
+            <el-icon><Plus /></el-icon>Add Location
           </el-button>
         </div>
       </div>
@@ -25,7 +25,7 @@
           }">
           <el-table-column 
             prop="name" 
-            label="位置名称" 
+            label="Location Name" 
             min-width="120"
             show-overflow-tooltip>
             <template #default="scope">
@@ -34,46 +34,46 @@
           </el-table-column>
           <el-table-column 
             prop="address" 
-            label="地址" 
+            label="Address" 
             min-width="200" 
             show-overflow-tooltip />
           <el-table-column 
-            label="设备" 
+            label="Devices" 
             min-width="100" 
             align="center">
             <template #default="scope">
               <el-button link type="primary" class="device-count" @click="goToDevices(scope.row)">
-                {{ scope.row.devices }} 台设备
+                {{ scope.row.devices }} Device<span v-if="scope.row.devices !== 1">s</span>
               </el-button>
             </template>
           </el-table-column>
           <el-table-column 
-            label="营业时间" 
+            label="Business Hours" 
             min-width="160"
             align="center">
             <template #default="scope">
               <span class="business-hours">
-                {{ scope.row.openTime || '--' }} 至 {{ scope.row.closeTime || '--' }}
+                {{ scope.row.openTime || '--' }} to {{ scope.row.closeTime || '--' }}
               </span>
             </template>
           </el-table-column>
           <el-table-column 
-            label="操作" 
+            label="Actions" 
             min-width="80" 
             fixed="right"
             align="center">
             <template #default="scope">
               <el-dropdown trigger="click">
                 <el-button link type="primary" class="action-button">
-                  操作<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                  Actions<el-icon class="el-icon--right"><ArrowDown /></el-icon>
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item @click="handleEdit(scope.row)">
-                      <el-icon><Edit /></el-icon>编辑
+                      <el-icon><Edit /></el-icon>Edit
                     </el-dropdown-item>
                     <el-dropdown-item @click="handleDelete(scope.row)" class="text-danger">
-                      <el-icon><Delete /></el-icon>删除
+                      <el-icon><Delete /></el-icon>Delete
                     </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -85,59 +85,59 @@
 
       <!-- 添加/编辑位置对话框 -->
       <el-dialog
-        :title="dialogType === 'add' ? '添加位置' : '编辑位置'"
+        :title="dialogType === 'add' ? 'Add Location' : 'Edit Location'"
         v-model="locationDialogVisible"
-        width="90%"
-        max-width="560px"
+        width="460px"
         class="location-dialog"
-        destroy-on-close>
+        destroy-on-close
+        :close-on-click-modal="false">
         <el-form
           :model="locationForm"
           :rules="locationRules"
           ref="locationFormRef"
-          label-width="100px"
+          label-width="120px"
           class="location-form">
-          <el-form-item label="位置名称" prop="name">
+          <el-form-item label="Location Name" prop="name">
             <el-input 
               v-model="locationForm.name" 
-              placeholder="请输入位置名称"
+              placeholder="Enter location name"
               clearable />
           </el-form-item>
-          <el-form-item label="地址" prop="address">
+          <el-form-item label="Address" prop="address">
             <el-input 
               v-model="locationForm.address" 
               type="textarea" 
               :rows="2" 
-              placeholder="请输入详细地址"
+              placeholder="Enter address"
               resize="none" />
           </el-form-item>
-          <el-form-item label="营业时间" class="time-range">
-            <div class="time-picker-container">
+          <el-form-item label="Business Hours">
+            <div class="time-picker-group">
               <el-time-select
                 v-model="locationForm.openTime"
-                placeholder="开始时间"
+                placeholder="Start Time"
                 :start="'00:00'"
                 :step="'00:30'"
                 :end="'23:30'"
-                class="time-picker"
+                style="width: 140px"
               />
-              <span class="time-separator">至</span>
+              <span class="time-separator">to</span>
               <el-time-select
                 v-model="locationForm.closeTime"
-                placeholder="结束时间"
+                placeholder="End Time"
                 :start="'00:00'"
                 :step="'00:30'"
                 :end="'23:30'"
                 :min-time="locationForm.openTime"
-                class="time-picker"
+                style="width: 140px"
               />
             </div>
           </el-form-item>
         </el-form>
         <template #footer>
           <div class="dialog-footer">
-            <el-button @click="locationDialogVisible = false">取消</el-button>
-            <el-button type="primary" @click="handleLocationSubmit">确定</el-button>
+            <el-button @click="locationDialogVisible = false">Cancel</el-button>
+            <el-button type="primary" @click="handleLocationSubmit">Confirm</el-button>
           </div>
         </template>
       </el-dialog>
@@ -171,10 +171,10 @@ const locationForm = reactive({
 
 const locationRules = {
   name: [
-    { required: true, message: '请输入位置名称', trigger: 'blur' }
+    { required: true, message: 'Please enter the location name', trigger: 'blur' }
   ],
   address: [
-    { required: true, message: '请输入地址', trigger: 'blur' }
+    { required: true, message: 'Please enter the address', trigger: 'blur' }
   ]
 }
 
@@ -201,21 +201,21 @@ const handleEdit = (row: Location) => {
 
 const handleDelete = (row: Location) => {
   ElMessageBox.confirm(
-    '确定要删除该位置吗？此操作不可恢复。',
-    '确认删除',
+    'Are you sure to delete this location?',
+    'Confirm Delete',
     {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
       type: 'warning'
     }
   ).then(async () => {
     try {
       await locationStore.deleteLocation(row.id)
-      ElMessage.success('位置已删除')
+      ElMessage.success('Location deleted successfully')
       await initData()
     } catch (error) {
-      console.error('删除失败:', error)
-      ElMessage.error('删除失败，请重试')
+      console.error('Delete failed:', error)
+      ElMessage.error('Delete failed, please try again')
     }
   }).catch(() => {})
 }
@@ -233,7 +233,7 @@ const handleLocationSubmit = async () => {
         openTime: locationForm.openTime,
         closeTime: locationForm.closeTime
       })
-      ElMessage.success('位置添加成功')
+      ElMessage.success('Location added successfully')
     } else if (currentLocation.value) {
       await locationStore.updateLocation(currentLocation.value.id, {
         name: locationForm.name,
@@ -241,22 +241,24 @@ const handleLocationSubmit = async () => {
         openTime: locationForm.openTime,
         closeTime: locationForm.closeTime
       })
-      ElMessage.success('位置更新成功')
+      ElMessage.success('Location updated successfully')
     }
     locationDialogVisible.value = false
     await initData()
   } catch (error) {
-    console.error('操作失败:', error)
-    ElMessage.error('操作失败，请重试')
+    console.error('Operation failed:', error)
+    ElMessage.error('Operation failed, please try again')
   }
 }
 
 // 跳转到设备管理页面
 const goToDevices = (location: Location) => {
   router.push({
-    name: 'settings',
-    params: { tab: 'devices' },
-    query: { locationId: location.id }
+    name: 'settings-devices',
+    query: { 
+      locationId: location.id,
+      locationName: location.name
+    }
   })
 }
 
@@ -266,7 +268,7 @@ const initData = async () => {
     const data = await locationStore.fetchLocations()
     locations.value = data
   } catch (error) {
-    console.error('获取位置列表失败:', error)
+    console.error('Get location list failed:', error)
   }
 }
 
@@ -351,11 +353,11 @@ onMounted(() => {
 
 .location-dialog {
   :deep(.el-dialog__body) {
-    padding: 24px;
+    padding: 20px 24px;
   }
 
-  :deep(.el-form-item__content) {
-    flex-wrap: nowrap;
+  :deep(.el-form-item:last-child) {
+    margin-bottom: 0;
   }
 }
 
@@ -365,31 +367,22 @@ onMounted(() => {
   }
 }
 
-.time-range {
-  .time-picker-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-  }
+.time-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  .time-picker {
-    flex: 1;
-    min-width: 120px;
-  }
-
-  .time-separator {
-    padding: 0 8px;
-    color: #909399;
-    flex-shrink: 0;
-  }
+.time-separator {
+  color: var(--el-text-color-secondary);
+  padding: 0 4px;
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding-top: 20px;
+  margin-top: 8px;
 }
 
 .text-danger {

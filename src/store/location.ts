@@ -1,16 +1,5 @@
 import { defineStore } from 'pinia'
-import { PiniaPluginContext } from 'pinia'
-
-export interface Location {
-  id: string
-  name: string
-  address: string
-  devices: number
-  openTime: string
-  closeTime: string
-  createdAt?: string
-  updatedAt?: string
-}
+import type { Location } from '@/types'
 
 interface LocationState {
   locations: Location[]

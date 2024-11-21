@@ -51,11 +51,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'settings',
         component: () => import('../views/settings/index.vue'),
+        redirect: { name: 'settings-profile' },
         children: [
-          {
-            path: '',
-            redirect: { name: 'settings-profile' }
-          },
           {
             path: 'profile',
             name: 'settings-profile',
@@ -77,9 +74,36 @@ const routes: RouteRecordRaw[] = [
             component: () => import('../views/settings/appearance/index.vue')
           },
           {
-            path: 'agreements',
-            name: 'settings-agreements',
-            component: () => import('../views/settings/agreements/index.vue')
+            path: 'devices',
+            name: 'settings-devices',
+            component: () => import('../views/settings/devices/DeviceManagement.vue')
+          },
+          {
+            path: 'locations',
+            name: 'settings-locations',
+            component: () => import('../views/settings/locations/LocationManagement.vue')
+          },
+          {
+            path: 'spaces',
+            name: 'settings-spaces',
+            component: () => import('../views/settings/spaces/index.vue'),
+            children: [
+              {
+                path: '',
+                name: 'settings-spaces-list',
+                component: () => import('../views/settings/spaces/SpaceList.vue')
+              },
+              {
+                path: 'resources',
+                name: 'settings-spaces-resources',
+                component: () => import('../views/settings/spaces/resources/ResourceList.vue')
+              },
+              {
+                path: 'categories',
+                name: 'settings-spaces-categories',
+                component: () => import('../views/settings/spaces/categories/CategoryList.vue')
+              }
+            ]
           }
         ]
       }
