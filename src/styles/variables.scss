@@ -1,0 +1,66 @@
+// Colors
+$primary-color: #409EFF;
+$success-color: #67C23A;
+$warning-color: #E6A23C;
+$danger-color: #F56C6C;
+$info-color: #909399;
+
+// Text colors
+$text-primary: #303133;
+$text-regular: #606266;
+$text-secondary: #909399;
+$text-placeholder: #C0C4CC;
+
+// Border colors
+$border-base: #DCDFE6;
+$border-light: #E4E7ED;
+$border-lighter: #EBEEF5;
+$border-extra-light: #F2F6FC;
+
+// Background colors
+$background-white: #FFFFFF;
+$background-base: #F5F7FA;
+
+// Font sizes
+$font-size-extra-large: 20px;
+$font-size-large: 18px;
+$font-size-medium: 16px;
+$font-size-base: 14px;
+$font-size-small: 13px;
+$font-size-extra-small: 12px;
+
+// Border radius
+$border-radius-base: 4px;
+$border-radius-small: 2px;
+$border-radius-round: 20px;
+$border-radius-circle: 100%;
+
+// Spacing
+$spacing-base: 8px;
+$spacing-large: 16px;
+$spacing-extra-large: 24px;
+
+// Layout
+$header-height: 64px;
+$sidebar-width: 200px;
+$container-max-width: 1440px;
+
+// Z-index
+$z-index-normal: 1;
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+
+// Transitions
+$transition-all: all .3s cubic-bezier(.645,.045,.355,1);
+$transition-base: .3s cubic-bezier(.645,.045,.355,1);
+$transition-fade: opacity .3s cubic-bezier(.645,.045,.355,1);
+$transition-border: border-color .3s cubic-bezier(.645,.045,.355,1);
+
+// Shadows
+$box-shadow-base: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+$box-shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1); 

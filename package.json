@@ -16,10 +16,10 @@
     "vercel-build": "vite build"
   },
   "dependencies": {
-    "element-plus": "^2.3.8",
     "@element-plus/icons-vue": "^2.1.0",
     "@supabase/supabase-js": "^2.46.1",
     "core-js": "^3.8.3",
+    "element-plus": "^2.3.8",
     "express": "^4.21.1",
     "pinia": "^2.1.6",
     "vue": "^3.3.4",
@@ -33,6 +33,7 @@
     "@vue/tsconfig": "^0.4.0",
     "eslint": "^8.45.0",
     "eslint-plugin-vue": "^9.15.1",
+    "sass": "^1.81.0",
     "terser": "^5.24.0",
     "typescript": "~5.1.6",
     "unplugin-auto-import": "^0.16.6",
