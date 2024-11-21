@@ -35,8 +35,30 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'employees',
-        name: 'employees',
-        component: () => import('../views/employees/EmployeeList.vue')
+        component: () => import('../views/employees/EmployeeLayout.vue'),
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: '',
+            name: 'employee-directory',
+            component: () => import('../views/employees/EmployeeDirectory.vue')
+          },
+          {
+            path: 'timeline',
+            name: 'employee-timeline',
+            component: () => import('../views/employees/EmployeeTimeline.vue')
+          },
+          {
+            path: 'archives',
+            name: 'employee-archives',
+            component: () => import('../views/employees/EmployeeProfile.vue')
+          },
+          {
+            path: 'profile/:id',
+            name: 'employee-profile',
+            component: () => import('../views/employees/EmployeeProfile.vue')
+          }
+        ]
       },
       {
         path: 'spaces',

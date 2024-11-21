@@ -1,8 +1,9 @@
 export interface Report {
-  id: string;
+  id?: string;
   title: string;
-  date: string;
   type: string;
-  status: 'completed' | 'pending';
-  downloadUrl?: string;
+  date: Date;
+  content: any;
+  createdBy?: string;
+  createdAt?: Date;
 } 
