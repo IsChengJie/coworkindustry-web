@@ -53,14 +53,14 @@ export const useAuthStore = defineStore('auth', {
     }) {
       const { data, error } = await supabase.auth.signUp({
         email: credentials.email,
-        password: credentials.password,
+        password: credentials.password || '123456',
         options: {
           data: {
             first_name: credentials.firstName,
             last_name: credentials.lastName,
             phone: credentials.phone,
             company: credentials.company,
-            address: credentials.address
+            address: credentials.address,
           }
         }
       })
