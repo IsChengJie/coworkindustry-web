@@ -1,5 +1,5 @@
+import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import * as VueRouter from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import HomeView from '../views/HomeView.vue'
@@ -50,15 +50,45 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'settings',
-        name: 'settings',
-        component: () => import('../views/settings/Settings.vue')
+        component: () => import('../views/settings/index.vue'),
+        children: [
+          {
+            path: '',
+            redirect: { name: 'settings-profile' }
+          },
+          {
+            path: 'profile',
+            name: 'settings-profile',
+            component: () => import('../views/settings/profile/index.vue')
+          },
+          {
+            path: 'security',
+            name: 'settings-security',
+            component: () => import('../views/settings/security/index.vue')
+          },
+          {
+            path: 'notification',
+            name: 'settings-notification',
+            component: () => import('../views/settings/notification/index.vue')
+          },
+          {
+            path: 'appearance',
+            name: 'settings-appearance',
+            component: () => import('../views/settings/appearance/index.vue')
+          },
+          {
+            path: 'agreements',
+            name: 'settings-agreements',
+            component: () => import('../views/settings/agreements/index.vue')
+          }
+        ]
       }
     ]
   }
 ]
 
-export const router = VueRouter.createRouter({
-  history: VueRouter.createWebHistory(import.meta.env.BASE_URL),
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
 

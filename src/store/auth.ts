@@ -214,7 +214,7 @@ export const useAuthStore = defineStore('auth', {
           duration: 3000,
           showClose: true,
           position: 'top',
-        })
+        });
         return data;
 
       } catch (error: any) {
