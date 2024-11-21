@@ -24,7 +24,7 @@ import TopNav from '@/components/layout/TopNav.vue'
 
 .main-content {
   flex: 1;
-  padding: 24px;
+  padding: 16px; /* 调整间距 */
   background-color: var(--el-bg-color-page);
 }
 
@@ -37,4 +37,4 @@ import TopNav from '@/components/layout/TopNav.vue'
 .fade-leave-to {
   opacity: 0;
 }
-</style> 
+</style>
