@@ -4,9 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "dev": "vite --mode development",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "build:staging": "vite build --mode staging",
+    "build:prod": "vite build --mode production",
+    "preview:staging": "vite preview --mode staging",
+    "preview:prod": "vite preview --mode production",
+    "start": "node server.js",
+    "vercel-build": "vite build"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
