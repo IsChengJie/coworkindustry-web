@@ -1,17 +1,26 @@
 import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
+import { ElMessage } from 'element-plus'
 
 interface UserInfo {
   email: string;
   token?: string;
 }
 
+interface State {
+  user: User | null;
+  userInfo: UserInfo | null;
+  isLoggedIn: boolean;
+  error: string | null;
+}
+
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: null as User | null,
-    userInfo: null as UserInfo | null,
-    isLoggedIn: false
+  state: (): State => ({
+    user: null,
+    userInfo: null,
+    isLoggedIn: false,
+    error: null
   }),
 
   getters: {
@@ -21,25 +30,28 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     async login(credentials: { email: string; password: string }) {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: credentials.email,
-        password: credentials.password
-      })
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: credentials.email,
+          password: credentials.password
+        })
 
-      if (error) {
+        if (error) throw error
+
+        if (data.user) {
+          this.user = data.user
+          this.userInfo = {
+            email: data.user.email!,
+            token: data.session?.access_token
+          }
+          this.isLoggedIn = true
+        }
+
+        return this.userInfo
+      } catch (error: any) {
+        this.error = error.message
         throw error
       }
-
-      if (data.user) {
-        this.user = data.user
-        this.userInfo = {
-          email: data.user.email!,
-          token: data.session?.access_token
-        }
-        this.isLoggedIn = true
-      }
-
-      return this.userInfo
     },
 
     async register(credentials: { 
@@ -52,7 +64,7 @@ export const useAuthStore = defineStore('auth', {
       address: string;
     }) {
       try {
-        // Ê×ÏÈ¼ì²éÓÃ»§ÊÇ·ñÒÑ´æÔÚ
+        // æ£€æŸ¥ç”¨æˆ·æ˜¯å¦å·²å­˜åœ¨
         const { data: existingUser } = await supabase
           .from('profiles')
           .select('*')
@@ -61,16 +73,16 @@ export const useAuthStore = defineStore('auth', {
 
         if (existingUser) {
           ElMessage({
-            message: '¸ÃÓÊÏäÒÑ±»×¢²á',
+            message: 'è¯¥é‚®ç®±å·²è¢«æ³¨å†Œ',
             type: 'error',
             duration: 3000,
             showClose: true,
             position: 'top',
           })
-          throw new Error('¸ÃÓÊÏäÒÑ±»×¢²á')
+          throw new Error('è¯¥é‚®ç®±å·²è¢«æ³¨å†Œ')
         }
 
-        // ×¢²áĞÂÓÃ»§
+        // æ³¨å†Œæ–°ç”¨æˆ·
         const { error: signUpError } = await supabase.auth.signUp({
           email: credentials.email,
           password: credentials.password || '123456',
@@ -87,7 +99,7 @@ export const useAuthStore = defineStore('auth', {
 
         if (signUpError) throw signUpError
 
-        // ²åÈëĞÂÓÃ»§Êı¾İ
+        // æ’å…¥æ–°ç”¨æˆ·æ•°æ®
         const { data: newUser, error: insertError } = await supabase
           .from('profiles')
           .insert([
@@ -107,7 +119,7 @@ export const useAuthStore = defineStore('auth', {
         if (insertError) {
           console.error('Insert user error:', insertError)
           ElMessage({
-            message: '×¢²áÊ§°Ü£¬ÇëÖØÊÔ',
+            message: 'æ³¨å†Œå¤±è´¥ï¼Œè¯·é‡è¯•',
             type: 'error',
             duration: 3000,
             showClose: true,
@@ -118,42 +130,31 @@ export const useAuthStore = defineStore('auth', {
 
         if (!newUser) {
           ElMessage({
-            message: '×¢²áÊ§°Ü£¬ÇëÖØÊÔ',
+            message: 'æ³¨å†Œå¤±è´¥ï¼Œè¯·é‡è¯•',
             type: 'error',
             duration: 3000,
             showClose: true,
             position: 'top',
           })
-          throw new Error('×¢²áÊ§°Ü£¬ÇëÖØÊÔ')
+          throw new Error('æ³¨å†Œå¤±è´¥ï¼Œè¯·é‡è¯•')
         }
-        }
+
         console.log('Registration successful:', newUser)
         ElMessage({
-          message: '×¢²á³É¹¦£¡',
+          message: 'æ³¨å†ŒæˆåŠŸï¼',
           type: 'success',
           duration: 3000,
           showClose: true,
           position: 'top',
         })
+        
         return newUser
-
-      } catch (error: any) {
-        console.error('Registration error:', error)
-        console.log('Registration successful:', data)
-        ElMessage({
-          message: '×¢²á³É¹¦£¡',
-          type: 'success',
-          duration: 3000,
-          showClose: true,
-          position: 'top',
-        })
-        return data
 
       } catch (error: any) {
         console.error('Registration error:', error)
         this.error = error.message
         ElMessage({
-          message: this.error || '×¢²áÊ§°Ü',
+          message: this.error || 'æ³¨å†Œå¤±è´¥',
           type: 'error',
           duration: 3000,
           showClose: true,
@@ -161,10 +162,13 @@ export const useAuthStore = defineStore('auth', {
         })
         throw error
       }
+    },
 
+    logout() {
       this.user = null
       this.userInfo = null
       this.isLoggedIn = false
+      localStorage.removeItem('userProfile')
     },
 
     async checkAuth() {
