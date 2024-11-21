@@ -52,25 +52,25 @@ export const useAuthStore = defineStore('auth', {
       address: string;
     }) {
       try {
-        // Ê×ÏÈ¼ì²éÓÃ»§ÊÇ·ñÒÑ´æÔÚ
+        // æ£€æŸ¥ç”¨æˆ·æ˜¯å¦å·²å­˜åœ¨
         const { data: existingUser } = await supabase
           .from('profiles')
           .select('*')
           .eq('email', credentials.email)
-          .maybeSingle()
+          .maybeSingle();
 
         if (existingUser) {
           ElMessage({
-            message: '¸ÃÓÊÏäÒÑ±»×¢²á',
+            message: 'ç”¨æˆ·å·²æ³¨å†Œ',
             type: 'error',
             duration: 3000,
             showClose: true,
             position: 'top',
-          })
-          throw new Error('¸ÃÓÊÏäÒÑ±»×¢²á')
+          });
+          throw new Error('ç”¨æˆ·å·²æ³¨å†Œ');
         }
 
-        // ×¢²áĞÂÓÃ»§
+        // æ³¨å†Œç”¨æˆ·
         const { error: signUpError } = await supabase.auth.signUp({
           email: credentials.email,
           password: credentials.password || '123456',
@@ -81,13 +81,13 @@ export const useAuthStore = defineStore('auth', {
               phone: credentials.phone,
               company: credentials.company,
               address: credentials.address,
-            }
-          }
-        })
+            },
+          },
+        });
 
-        if (signUpError) throw signUpError
+        if (signUpError) throw signUpError;
 
-        // ²åÈëĞÂÓÃ»§Êı¾İ
+        // æ’å…¥ç”¨æˆ·ä¿¡æ¯
         const { data: newUser, error: insertError } = await supabase
           .from('profiles')
           .insert([
@@ -98,73 +98,60 @@ export const useAuthStore = defineStore('auth', {
               last_name: credentials.lastName,
               phone: credentials.phone,
               company: credentials.company,
-              address: credentials.address
-            }
+              address: credentials.address,
+            },
           ])
           .select()
-          .maybeSingle()
+          .maybeSingle();
 
         if (insertError) {
-          console.error('Insert user error:', insertError)
+          console.error('Insert user error:', insertError);
           ElMessage({
-            message: '×¢²áÊ§°Ü£¬ÇëÖØÊÔ',
+            message: 'æ³¨å†Œå¤±è´¥',
             type: 'error',
             duration: 3000,
             showClose: true,
             position: 'top',
-          })
-          throw insertError
+          });
+          throw insertError;
         }
 
         if (!newUser) {
           ElMessage({
-            message: '×¢²áÊ§°Ü£¬ÇëÖØÊÔ',
+            message: 'æ³¨å†Œå¤±è´¥',
             type: 'error',
             duration: 3000,
             showClose: true,
             position: 'top',
-          })
-          throw new Error('×¢²áÊ§°Ü£¬ÇëÖØÊÔ')
+          });
+          throw new Error('æ³¨å†Œå¤±è´¥');
         }
-        }
-        console.log('Registration successful:', newUser)
+
+        console.log('Registration successful:', newUser);
         ElMessage({
-          message: '×¢²á³É¹¦£¡',
+          message: 'æ³¨å†ŒæˆåŠŸ',
           type: 'success',
           duration: 3000,
           showClose: true,
           position: 'top',
-        })
-        return newUser
+        });
+        return newUser;
 
       } catch (error: any) {
-        console.error('Registration error:', error)
-        console.log('Registration successful:', data)
+        console.error('Registration error:', error);
         ElMessage({
-          message: '×¢²á³É¹¦£¡',
-          type: 'success',
-          duration: 3000,
-          showClose: true,
-          position: 'top',
-        })
-        return data
-
-      } catch (error: any) {
-        console.error('Registration error:', error)
-        this.error = error.message
-        ElMessage({
-          message: this.error || '×¢²áÊ§°Ü',
+          message: error.message || 'æ³¨å†Œå¤±è´¥',
           type: 'error',
           duration: 3000,
           showClose: true,
           position: 'top',
-        })
-        throw error
+        });
+        throw error;
+      } finally {
+        this.user = null;
+        this.userInfo = null;
+        this.isLoggedIn = false;
       }
-
-      this.user = null
-      this.userInfo = null
-      this.isLoggedIn = false
     },
 
     async checkAuth() {
