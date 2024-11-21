@@ -94,11 +94,8 @@ const handleLogin = async () => {
   try {
     loading.value = true
     await formRef.value.validate()
-    
-    await authStore.login({
-      email: loginForm.email,
-      password: loginForm.password
-    })
+    console.log('Attempting login with:', loginForm)
+    await authStore.login(loginForm.email, loginForm.password)
 
     ElMessage.success('Login successful')
     const redirectPath = (route.query.redirect as string) || '/'

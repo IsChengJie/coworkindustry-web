@@ -1,5 +1,5 @@
-import type { RouteRecordRaw, RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
-import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
+import * as VueRouter from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import HomeView from '../views/HomeView.vue'
@@ -57,16 +57,12 @@ const routes: RouteRecordRaw[] = [
   }
 ]
 
-export const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+export const router = VueRouter.createRouter({
+  history: VueRouter.createWebHistory(import.meta.env.BASE_URL),
   routes
 })
 
-router.beforeEach((
-  to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
-  next: NavigationGuardNext
-) => {
+router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
