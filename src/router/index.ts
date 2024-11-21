@@ -57,7 +57,11 @@ const routes: RouteRecordRaw[] = [
   }
 ]
 
+<<<<<<< HEAD
 const router = VueRouter.createRouter({
+=======
+export const router = VueRouter.createRouter({
+>>>>>>> c899dace06319041fe2792e37d602454bdc39a70
   history: VueRouter.createWebHistory(import.meta.env.BASE_URL),
   routes
 })
