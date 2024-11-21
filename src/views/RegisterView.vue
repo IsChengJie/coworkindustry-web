@@ -135,6 +135,7 @@ const rules = reactive<FormRules>({
 const handleRegister = async () => {
   if (!formRef.value) return
   
+  
   try {
     await formRef.value.validate()
     
