@@ -22,6 +22,10 @@
           <el-icon><Brush /></el-icon>
           <span>外观设置</span>
         </el-menu-item>
+        <el-menu-item index="devices">
+          <el-icon><Monitor /></el-icon>
+          <span>设备管理</span>
+        </el-menu-item>
       </el-menu>
     </div>
 
@@ -100,15 +104,19 @@
           </el-form-item>
         </el-form>
       </div>
+
+      <!-- 设备管理 -->
+      <device-management v-show="activeMenu === 'devices'" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { User, Lock, Bell, Brush } from '@element-plus/icons-vue'
+import { User, Lock, Bell, Brush, Monitor, Plus } from '@element-plus/icons-vue'
+import DeviceManagement from './DeviceManagement.vue'
 
 const activeMenu = ref('profile')
 
@@ -264,5 +272,26 @@ const saveAppearanceSettings = () => {
     margin: 0;
     padding: 16px;
   }
+}
+
+.devices-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.devices-description {
+  color: #666;
+  margin: 0;
+  flex: 1;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 </style> 
