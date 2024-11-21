@@ -178,22 +178,22 @@ export const useAuthStore = defineStore('auth', {
               last_name: credentials.lastName,
               phone: credentials.phone,
               company: credentials.company,
-              address: credentials.address
-            }
+              address: credentials.address,
+            },
           ])
           .select()
-          .maybeSingle()
+          .maybeSingle();
 
         if (insertError) {
-          console.error('Insert user error:', insertError)
+          console.error('Insert user error:', insertError);
           ElMessage({
             message: '注册失败，请重试',
             type: 'error',
             duration: 3000,
             showClose: true,
             position: 'top',
-          })
-          throw insertError
+          });
+          throw insertError;
         }
 
         if (!data) {
@@ -214,12 +214,11 @@ export const useAuthStore = defineStore('auth', {
           duration: 3000,
           showClose: true,
           position: 'top',
-        })
-        return data
+        });
+        return newUser;
 
       } catch (error: any) {
-        console.error('Registration error:', error)
-        this.error = error.message
+        console.error('Registration error:', error);
         ElMessage({
           message: this.error || '注册失败',
           type: 'error',
