@@ -1,140 +1,58 @@
 import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabase'
-import { ElMessage } from 'element-plus'
+import type { User } from '@supabase/supabase-js'
 
-interface Profile {
-  id?: string
-  email: string
-  first_name: string
-  last_name: string
-  phone?: string
-  company?: string
-  address?: string
-  created_at?: string
+interface UserInfo {
+  email: string;
+  token?: string;
 }
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    profile: null as Profile | null,
-    isLoggedIn: false,
-    loading: false,
-    error: null as string | null
+    user: null as User | null,
+    userInfo: null as UserInfo | null,
+    isLoggedIn: false
   }),
 
   getters: {
-    userProfile: (state) => state.profile,
+    getUserInfo: (state) => state.userInfo,
     getIsLoggedIn: (state) => state.isLoggedIn
   },
 
   actions: {
-    async login(email: string, password: string) {
-      try {
-        this.loading = true
-        this.error = null
-        
-        if (!email) {
-          ElMessage({
-            message: 'è¯·è¾“å…¥é‚®ç®±',
-            type: 'error',
-            duration: 3000,
-            showClose: true,
-            position: 'top',
-          })
-          throw new Error('è¯·è¾“å…¥é‚®ç®±')
-        }
-        
-        const normalizedEmail = String(email).toLowerCase().trim()
-        
-        console.log('Attempting login with normalized email:', normalizedEmail)
-        
-        const { data: matchedUser, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('email', normalizedEmail)
-          .maybeSingle()
+    async login(credentials: { email: string; password: string }) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password
+      })
 
-        console.log('Query result:', { matchedUser, error })
-
-        if (error) {
-          console.error('Login query error:', error)
-          ElMessage({
-            message: 'ç™»å½•å¤±è´¥ï¼Œè¯·é‡è¯•',
-            type: 'error',
-            duration: 3000,
-            showClose: true,
-            position: 'top',
-          })
-          throw error
-        }
-        
-        if (!matchedUser) {
-          console.log('No user found with email:', normalizedEmail)
-          ElMessage({
-            message: 'ç”¨æˆ·ä¸å­˜åœ¨',
-            type: 'error',
-            duration: 3000,
-            showClose: true,
-            position: 'top',
-          })
-          throw new Error('ç”¨æˆ·ä¸å­˜åœ¨')
-        }
-
-        if (matchedUser.password !== password) {
-          ElMessage({
-            message: 'å¯†ç é”™è¯¯',
-            type: 'error',
-            duration: 3000,
-            showClose: true,
-            position: 'top',
-          })
-          throw new Error('å¯†ç é”™è¯¯')
-        }
-
-        console.log('Login successful:', matchedUser)
-
-        this.profile = {
-          id: matchedUser.id,
-          email: matchedUser.email,
-          first_name: matchedUser.first_name,
-          last_name: matchedUser.last_name,
-          phone: matchedUser.phone,
-          company: matchedUser.company,
-          address: matchedUser.address,
-          created_at: matchedUser.created_at
-        }
-        
-        this.isLoggedIn = true
-        localStorage.setItem('userProfile', JSON.stringify(this.profile))
-        
-        return this.profile
-
-      } catch (error: any) {
-        console.error('Login error:', error)
-        this.error = error.message
-        ElMessage({
-          message: this.error || 'ç™»å½•å¤±è´¥',
-          type: 'error',
-          duration: 3000,
-          showClose: true,
-          position: 'top',
-        })
+      if (error) {
         throw error
-      } finally {
-        this.loading = false
       }
+
+      if (data.user) {
+        this.user = data.user
+        this.userInfo = {
+          email: data.user.email!,
+          token: data.session?.access_token
+        }
+        this.isLoggedIn = true
+      }
+
+      return this.userInfo
     },
 
     async register(credentials: { 
-      email: string
-      password: string
-      firstName: string
-      lastName: string
-      phone?: string
-      company?: string
-      address?: string
+      email: string; 
+      password: string;
+      firstName: string;
+      lastName: string;
+      phone: string;
+      company: string;
+      address: string;
     }) {
       try {
-        // é¦–å…ˆæ£€æŸ¥ç”¨æˆ·æ˜¯å¦å·²å­˜åœ¨
+        // Ê×ÏÈ¼ì²éÓÃ»§ÊÇ·ñÒÑ´æÔÚ
         const { data: existingUser } = await supabase
           .from('profiles')
           .select('*')
@@ -143,16 +61,16 @@ export const useAuthStore = defineStore('auth', {
 
         if (existingUser) {
           ElMessage({
-            message: 'è¯¥é‚®ç®±å·²è¢«æ³¨å†Œ',
+            message: '¸ÃÓÊÏäÒÑ±»×¢²á',
             type: 'error',
             duration: 3000,
             showClose: true,
             position: 'top',
           })
-          throw new Error('è¯¥é‚®ç®±å·²è¢«æ³¨å†Œ')
+          throw new Error('¸ÃÓÊÏäÒÑ±»×¢²á')
         }
 
-        // æ³¨å†Œæ–°ç”¨æˆ·
+        // ×¢²áĞÂÓÃ»§
         const { error: signUpError } = await supabase.auth.signUp({
           email: credentials.email,
           password: credentials.password || '123456',
@@ -169,7 +87,7 @@ export const useAuthStore = defineStore('auth', {
 
         if (signUpError) throw signUpError
 
-        // æ’å…¥æ–°ç”¨æˆ·æ•°æ®
+        // ²åÈëĞÂÓÃ»§Êı¾İ
         const { data: newUser, error: insertError } = await supabase
           .from('profiles')
           .insert([
@@ -189,7 +107,7 @@ export const useAuthStore = defineStore('auth', {
         if (insertError) {
           console.error('Insert user error:', insertError)
           ElMessage({
-            message: 'æ³¨å†Œå¤±è´¥ï¼Œè¯·é‡è¯•',
+            message: '×¢²áÊ§°Ü£¬ÇëÖØÊÔ',
             type: 'error',
             duration: 3000,
             showClose: true,
@@ -200,18 +118,18 @@ export const useAuthStore = defineStore('auth', {
 
         if (!newUser) {
           ElMessage({
-            message: 'æ³¨å†Œå¤±è´¥ï¼Œè¯·é‡è¯•',
+            message: '×¢²áÊ§°Ü£¬ÇëÖØÊÔ',
             type: 'error',
             duration: 3000,
             showClose: true,
             position: 'top',
           })
-          throw new Error('æ³¨å†Œå¤±è´¥ï¼Œè¯·é‡è¯•')
+          throw new Error('×¢²áÊ§°Ü£¬ÇëÖØÊÔ')
         }
-
+        }
         console.log('Registration successful:', newUser)
         ElMessage({
-          message: 'æ³¨å†ŒæˆåŠŸï¼',
+          message: '×¢²á³É¹¦£¡',
           type: 'success',
           duration: 3000,
           showClose: true,
@@ -221,21 +139,54 @@ export const useAuthStore = defineStore('auth', {
 
       } catch (error: any) {
         console.error('Registration error:', error)
+        console.log('Registration successful:', data)
+        ElMessage({
+          message: '×¢²á³É¹¦£¡',
+          type: 'success',
+          duration: 3000,
+          showClose: true,
+          position: 'top',
+        })
+        return data
+
+      } catch (error: any) {
+        console.error('Registration error:', error)
+        this.error = error.message
+        ElMessage({
+          message: this.error || '×¢²áÊ§°Ü',
+          type: 'error',
+          duration: 3000,
+          showClose: true,
+          position: 'top',
+        })
         throw error
       }
-    },
 
-    async logout() {
-      this.profile = null
+      this.user = null
+      this.userInfo = null
       this.isLoggedIn = false
-      localStorage.removeItem('userProfile')
     },
 
     async checkAuth() {
-      const savedProfile = localStorage.getItem('userProfile')
-      if (savedProfile) {
-        this.profile = JSON.parse(savedProfile)
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session?.user) {
+        this.user = session.user
+        this.userInfo = {
+          email: session.user.email!,
+          token: session.access_token
+        }
         this.isLoggedIn = true
+      }
+    },
+
+    async resetPassword(email: string) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      })
+
+      if (error) {
+        throw error
       }
     }
   }
