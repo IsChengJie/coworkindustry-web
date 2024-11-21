@@ -133,42 +133,13 @@ export const useAuthStore = defineStore('auth', {
       company?: string
       address?: string
     }) {
-<<<<<<< HEAD
-      const { data, error } = await supabase.auth.signUp({
-        email: credentials.email,
-        password: credentials.password || '123456',
-        options: {
-          data: {
-            first_name: credentials.firstName,
-            last_name: credentials.lastName,
-            phone: credentials.phone,
-            company: credentials.company,
-            address: credentials.address,
-          }
-=======
       try {
-        this.loading = true
-        this.error = null
-
-        // 检查邮箱是否已存在
-        const { data: existingUser, error: checkError } = await supabase
+        // 首先检查用户是否已存在
+        const { data: existingUser } = await supabase
           .from('profiles')
-          .select('id')
+          .select('*')
           .eq('email', credentials.email)
           .maybeSingle()
-
-        if (checkError) {
-          console.error('Check existing user error:', checkError)
-          ElMessage({
-            message: '检查邮箱时出错，请重试',
-            type: 'error',
-            duration: 3000,
-            showClose: true,
-            position: 'top',
-          })
-          throw checkError
->>>>>>> c899dace06319041fe2792e37d602454bdc39a70
-        }
 
         if (existingUser) {
           ElMessage({
@@ -181,8 +152,25 @@ export const useAuthStore = defineStore('auth', {
           throw new Error('该邮箱已被注册')
         }
 
+        // 注册新用户
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: credentials.email,
+          password: credentials.password || '123456',
+          options: {
+            data: {
+              first_name: credentials.firstName,
+              last_name: credentials.lastName,
+              phone: credentials.phone,
+              company: credentials.company,
+              address: credentials.address,
+            }
+          }
+        })
+
+        if (signUpError) throw signUpError
+
         // 插入新用户数据
-        const { data, error: insertError } = await supabase
+        const { data: newUser, error: insertError } = await supabase
           .from('profiles')
           .insert([
             {
@@ -210,7 +198,7 @@ export const useAuthStore = defineStore('auth', {
           throw insertError
         }
 
-        if (!data) {
+        if (!newUser) {
           ElMessage({
             message: '注册失败，请重试',
             type: 'error',
@@ -221,7 +209,7 @@ export const useAuthStore = defineStore('auth', {
           throw new Error('注册失败，请重试')
         }
 
-        console.log('Registration successful:', data)
+        console.log('Registration successful:', newUser)
         ElMessage({
           message: '注册成功！',
           type: 'success',
@@ -229,21 +217,11 @@ export const useAuthStore = defineStore('auth', {
           showClose: true,
           position: 'top',
         })
-        return data
+        return newUser
 
       } catch (error: any) {
         console.error('Registration error:', error)
-        this.error = error.message
-        ElMessage({
-          message: this.error || '注册失败',
-          type: 'error',
-          duration: 3000,
-          showClose: true,
-          position: 'top',
-        })
         throw error
-      } finally {
-        this.loading = false
       }
     },
 
