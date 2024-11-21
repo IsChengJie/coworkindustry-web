@@ -1,5 +1,4 @@
-import type { RouteRecordRaw } from 'vue-router'
-import * as VueRouter from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw, type NavigationGuardNext, type RouteLocationNormalized } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import HomeView from '../views/HomeView.vue'
@@ -40,8 +39,23 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'spaces',
-        name: 'spaces',
-        component: () => import('../views/spaces/SpaceList.vue')
+        component: () => import('../views/spaces/index.vue'),
+        children: [
+          {
+            path: '',
+            redirect: '/spaces/bookings'
+          },
+          {
+            path: 'bookings',
+            name: 'space-bookings',
+            component: () => import('../views/spaces/bookings/index.vue')
+          },
+          {
+            path: 'resource-availability',
+            name: 'resource-availability',
+            component: () => import('../views/spaces/resource-availability/index.vue')
+          }
+        ]
       },
       {
         path: 'deliveries',
@@ -57,12 +71,16 @@ const routes: RouteRecordRaw[] = [
   }
 ]
 
-export const router = VueRouter.createRouter({
-  history: VueRouter.createWebHistory(import.meta.env.BASE_URL),
+export const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
+  next: NavigationGuardNext
+) => {
   const authStore = useAuthStore()
   
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
