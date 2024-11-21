@@ -215,7 +215,7 @@ export const useAuthStore = defineStore('auth', {
           showClose: true,
           position: 'top',
         });
-        return newUser;
+        return data;
 
       } catch (error: any) {
         console.error('Registration error:', error);
