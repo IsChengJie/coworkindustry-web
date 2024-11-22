@@ -24,7 +24,7 @@
     <!-- 资源列表 -->
     <div class="resource-table">
       <el-table :data="resources" style="width: 100%">
-        <el-table-column width="50">
+        <el-table-column width="60">
           <template #default>
             <el-checkbox />
           </template>

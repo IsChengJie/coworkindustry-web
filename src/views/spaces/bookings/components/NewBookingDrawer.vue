@@ -1,12 +1,13 @@
 <template>
   <el-drawer
     :model-value="visible"
-    title="New Booking"
+    :title="currentStep === 1 ? 'New Booking' : 'Select Resource'"
     size="520px"
     :destroy-on-close="true"
     @close="handleClose"
   >
-    <div class="drawer-content">
+    <!-- 第一步：填写预订信息 -->
+    <div v-if="currentStep === 1" class="drawer-content">
       <el-form
         ref="formRef"
         :model="form"
@@ -169,12 +170,81 @@
 
       <!-- 底部按钮 -->
       <div class="drawer-footer">
-        <div class="selected-resources">
-          0 resources selected
-        </div>
         <div class="action-buttons">
           <el-button @click="handleClose">Cancel</el-button>
-          <el-button type="primary" @click="handleSubmit">Submit</el-button>
+          <el-button 
+            type="primary" 
+            class="available-resources-btn"
+            :disabled="availableResourcesCount === 0"
+            @click="handleNext"
+          >
+            {{ availableResourcesCount }} available resources
+          </el-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第二步：选择资源 -->
+    <div v-else class="drawer-content">
+      <!-- 头部信息展示 -->
+      <div class="resource-header">
+        <div class="location-time">
+          <div class="location">{{ form.location }}</div>
+          <div class="time-range">{{ formatDateRange() }}</div>
+        </div>
+      </div>
+
+      <!-- 资源列表 -->
+      <div class="resource-list">
+        <el-radio-group v-model="selectedResource" class="resource-options">
+          <div 
+            v-for="resource in availableResources" 
+            :key="resource.id"
+            class="resource-item"
+            :class="{ 'is-selected': selectedResource === resource.id }"
+          >
+            <el-radio :label="resource.id" class="resource-radio">
+              <div class="resource-info">
+                <div class="resource-main">
+                  <div class="resource-name">{{ resource.name }}</div>
+                  <div class="resource-meta">
+                    <span class="capacity">
+                      <el-icon><User /></el-icon>
+                      {{ resource.capacity }} capacity
+                    </span>
+                  </div>
+                </div>
+                <div class="resource-features">
+                  <el-tag 
+                    v-for="feature in resource.features" 
+                    :key="feature"
+                    size="small"
+                    effect="plain"
+                    class="feature-tag"
+                  >
+                    {{ feature }}
+                  </el-tag>
+                </div>
+              </div>
+            </el-radio>
+          </div>
+        </el-radio-group>
+      </div>
+
+      <!-- 底部按钮 -->
+      <div class="drawer-footer">
+        <div class="action-buttons">
+          <el-button @click="currentStep = 1">
+            <el-icon class="el-icon--left"><ArrowLeft /></el-icon>
+            Back
+          </el-button>
+          <el-button 
+            type="primary"
+            :disabled="!selectedResource"
+            @click="handleSubmit"
+          >
+            Confirm Booking
+          </el-button>
         </div>
       </div>
     </div>
@@ -182,7 +252,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits } from 'vue'
+import { ref, defineEmits, computed, watch } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { 
   Monitor, 
@@ -190,8 +260,11 @@ import {
   VideoCamera, 
   Coffee, 
   Printer, 
-  Connection 
+  Connection, 
+  User, 
+  ArrowLeft 
 } from '@element-plus/icons-vue'
+import dayjs from 'dayjs'
 
 const emit = defineEmits(['update:visible', 'submit'])
 
@@ -224,19 +297,50 @@ const rules: FormRules = {
   features: [{ type: 'array', message: 'Please select at least one feature' }]
 }
 
+// 步骤控制
+const currentStep = ref(1)
+const selectedResource = ref('')
+
+// 模拟可用资源数据
+const availableResources = ref([
+  {
+    id: 1,
+    name: 'Meeting Room A',
+    capacity: 8,
+    features: ['Display', 'Whiteboard']
+  },
+  {
+    id: 2,
+    name: 'Meeting Room B',
+    capacity: 12,
+    features: ['Display', 'Video Conference']
+  }
+])
+
+// 格式化日期范围显示
+const formatDateRange = () => {
+  const startDate = dayjs(form.value.startDate).format('MMM D, YYYY')
+  const startTime = dayjs(form.value.startTime).format('HH:mm')
+  const endDate = dayjs(form.value.endDate).format('MMM D, YYYY')
+  const endTime = dayjs(form.value.endTime).format('HH:mm')
+  
+  return `${startDate} ${startTime} - ${endDate} ${endTime}`
+}
+
 const handleClose = () => {
+  currentStep.value = 1
+  selectedResource.value = ''
   emit('update:visible', false)
 }
 
-const handleSubmit = async () => {
-  if (!formRef.value) return
+const handleSubmit = () => {
+  if (!selectedResource.value) return
   
-  await formRef.value.validate((valid, fields) => {
-    if (valid) {
-      emit('submit', form.value)
-      handleClose()
-    }
+  emit('submit', {
+    ...form.value,
+    resourceId: selectedResource.value
   })
+  handleClose()
 }
 
 // 可用功能列表
@@ -278,6 +382,62 @@ const availableFeatures = [
     description: 'High-speed internet'
   }
 ]
+
+// 模拟API调用获取可用资源数量
+const getAvailableResourcesCount = async (params: any): Promise<number> => {
+  // 这里替换为实际的API调用
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // 模拟根据表单数据返回不同的资源数量
+      const hasValidDates = params.startDate && params.endDate
+      resolve(hasValidDates ? 5 : 0)
+    }, 500)
+  })
+}
+
+// 监听表单变化并更新可用资源数量
+const availableResourcesCount = ref(0)
+const updateAvailableResources = async () => {
+  const params = {
+    location: form.value.location,
+    space: form.value.space,
+    startDate: form.value.startDate,
+    startTime: form.value.startTime,
+    endDate: form.value.endDate,
+    endTime: form.value.endTime,
+    features: form.value.features
+  }
+  
+  availableResourcesCount.value = await getAvailableResourcesCount(params)
+}
+
+// 监听关键字段变化
+watch(
+  () => ({
+    location: form.value.location,
+    space: form.value.space,
+    startDate: form.value.startDate,
+    startTime: form.value.startTime,
+    endDate: form.value.endDate,
+    endTime: form.value.endTime,
+    features: form.value.features
+  }),
+  async () => {
+    await updateAvailableResources()
+  },
+  { deep: true }
+)
+
+// 处理下一步
+const handleNext = async () => {
+  if (!formRef.value) return
+  
+  // 验证表单
+  const valid = await formRef.value.validate()
+  if (valid && availableResourcesCount.value > 0) {
+    currentStep.value = 2
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -376,16 +536,20 @@ const availableFeatures = [
   background-color: #fff;
   border-top: 1px solid #f0f0f0;
 
-  .selected-resources {
-    color: #6b7280;
-    font-size: 14px;
-    margin-bottom: 16px;
-  }
-
   .action-buttons {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between; // 改为两端对齐
     gap: 12px;
+  }
+
+  .available-resources-btn {
+    flex: 1; // 让按钮占据剩余空间
+    max-width: 200px; // 限制最大宽度
+    
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
   }
 }
 
@@ -484,6 +648,229 @@ const availableFeatures = [
   
   .el-select__tags {
     margin: 3px 0;
+  }
+}
+
+.resource-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.resource-header {
+  padding: 20px 24px;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #f0f0f0;
+
+  .location-time {
+    .location {
+      font-size: 16px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+
+    .time-range {
+      font-size: 14px;
+      color: #6b7280;
+    }
+  }
+}
+
+.resource-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.resource-item {
+  width: 100%;
+  padding: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--el-color-primary);
+    background-color: var(--el-color-primary-light-9);
+  }
+
+  &.is-selected {
+    border-color: var(--el-color-primary);
+    background-color: var(--el-color-primary-light-9);
+    
+    .resource-name {
+      color: var(--el-color-primary);
+    }
+  }
+}
+
+.resource-radio {
+  width: 100%;
+  padding: 16px;
+  margin: 0;
+  height: auto;
+
+  :deep(.el-radio__input) {
+    align-self: flex-start;
+    margin-top: 4px;
+  }
+
+  :deep(.el-radio__label) {
+    padding: 0 0 0 12px;
+    width: calc(100% - 24px); // 减去单选框的宽度
+  }
+}
+
+.resource-info {
+  width: 100%;
+}
+
+.resource-main {
+  margin-bottom: 12px;
+}
+
+.resource-name {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.resource-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #6b7280;
+  font-size: 13px;
+
+  .capacity {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .el-icon {
+      font-size: 14px;
+    }
+  }
+}
+
+.resource-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .feature-tag {
+    font-size: 12px;
+    padding: 0 8px;
+    height: 24px;
+    line-height: 22px;
+    background-color: #f3f4f6;
+    border-color: transparent;
+    color: #374151;
+  }
+}
+
+// 优化单选框组件的样式
+:deep(.el-radio-group) {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+:deep(.el-radio) {
+  display: flex;
+  margin-right: 0;
+  
+  .el-radio__label {
+    flex: 1;
+  }
+}
+
+.drawer-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 16px 24px;
+  background-color: #fff;
+  border-top: 1px solid #f0f0f0;
+
+  .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+
+    .el-button {
+      min-width: 100px;
+    }
+  }
+}
+
+// 优化滚动条样式
+.resource-list {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #9ca3af;
+    }
+  }
+}
+
+// 添加选择动画
+.resource-item {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--el-color-primary);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+
+  &.is-selected::before {
+    opacity: 0.05;
+  }
+
+  // 添加点击涟漪效果
+  &:active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+  }
+}
+
+@keyframes ripple {
+  to {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
   }
 }
 </style> 
